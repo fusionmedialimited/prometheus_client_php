@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Prometheus;
 
 use InvalidArgumentException;
@@ -26,12 +24,15 @@ class Histogram extends Collector
      */
     public function __construct(
         Adapter $adapter,
-        string $namespace,
-        string $name,
-        string $help,
+        $namespace,
+        $name,
+        $help,
         array $labels = [],
         array $buckets = null
     ) {
+        $namespace = (string) $namespace;
+        $name = (string) $name;
+        $help = (string) $help;
         parent::__construct($adapter, $namespace, $name, $help, $labels);
 
         if (null === $buckets) {
@@ -59,9 +60,9 @@ class Histogram extends Collector
     /**
      * List of default buckets suitable for typical web application latency metrics
      *
-     * @return float[]
+     * @return mixed[]
      */
-    public static function getDefaultBuckets(): array
+    public static function getDefaultBuckets()
     {
         return [
             0.005,
@@ -86,10 +87,13 @@ class Histogram extends Collector
      * @param float $growthFactor
      * @param int   $numberOfBuckets
      *
-     * @return float[]
+     * @return mixed[]
      */
-    public static function exponentialBuckets(float $start, float $growthFactor, int $numberOfBuckets): array
+    public static function exponentialBuckets($start, $growthFactor, $numberOfBuckets)
     {
+        $start = (double) $start;
+        $growthFactor = (double) $growthFactor;
+        $numberOfBuckets = (int) $numberOfBuckets;
         if ($numberOfBuckets < 1) {
             throw new InvalidArgumentException('Number of buckets must be a positive integer');
         }
@@ -115,9 +119,11 @@ class Histogram extends Collector
     /**
      * @param double $value e.g. 123
      * @param string[]  $labels e.g. ['status', 'opcode']
+     * @return void
      */
-    public function observe(float $value, array $labels = []): void
+    public function observe($value, array $labels = [])
     {
+        $value = (double) $value;
         $this->assertLabelsAreDefinedCorrectly($labels);
 
         $this->storageAdapter->updateHistogram(
@@ -136,7 +142,7 @@ class Histogram extends Collector
     /**
      * @return string
      */
-    public function getType(): string
+    public function getType()
     {
         return self::TYPE;
     }

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Prometheus;
 
 class RenderTextFormat implements RendererInterface
@@ -12,9 +10,9 @@ class RenderTextFormat implements RendererInterface
      * @param MetricFamilySamples[] $metrics
      * @return string
      */
-    public function render(array $metrics): string
+    public function render(array $metrics)
     {
-        usort($metrics, function (MetricFamilySamples $a, MetricFamilySamples $b): int {
+        usort($metrics, function (MetricFamilySamples $a, MetricFamilySamples $b) {
             return strcmp($a->getName(), $b->getName());
         });
 
@@ -34,7 +32,7 @@ class RenderTextFormat implements RendererInterface
      * @param Sample $sample
      * @return string
      */
-    private function renderSample(MetricFamilySamples $metric, Sample $sample): string
+    private function renderSample(MetricFamilySamples $metric, Sample $sample)
     {
         $labelNames = $metric->getLabelNames();
         if ($metric->hasLabelNames() || $sample->hasLabelNames()) {
@@ -48,8 +46,9 @@ class RenderTextFormat implements RendererInterface
      * @param string $v
      * @return string
      */
-    private function escapeLabelValue(string $v): string
+    private function escapeLabelValue($v)
     {
+        $v = (string) $v;
         return str_replace(["\\", "\n", "\""], ["\\\\", "\\n", "\\\""], $v);
     }
 
@@ -57,9 +56,9 @@ class RenderTextFormat implements RendererInterface
      * @param string[]  $labelNames
      * @param Sample $sample
      *
-     * @return string[]
+     * @return mixed[]
      */
-    private function escapeAllLabels(array $labelNames, Sample $sample): array
+    private function escapeAllLabels(array $labelNames, Sample $sample)
     {
         $escapedLabels = [];
 

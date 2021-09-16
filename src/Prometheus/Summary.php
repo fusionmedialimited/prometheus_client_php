@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Prometheus;
 
 use InvalidArgumentException;
@@ -33,13 +31,17 @@ class Summary extends Collector
      */
     public function __construct(
         Adapter $adapter,
-        string $namespace,
-        string $name,
-        string $help,
+        $namespace,
+        $name,
+        $help,
         array $labels = [],
-        int $maxAgeSeconds = 600,
+        $maxAgeSeconds = 600,
         array $quantiles = null
     ) {
+        $namespace = (string) $namespace;
+        $name = (string) $name;
+        $help = (string) $help;
+        $maxAgeSeconds = (int) $maxAgeSeconds;
         parent::__construct($adapter, $namespace, $name, $help, $labels);
 
         if (null === $quantiles) {
@@ -79,9 +81,9 @@ class Summary extends Collector
     /**
      * List of default quantiles suitable for typical web application latency metrics
      *
-     * @return float[]
+     * @return mixed[]
      */
-    public static function getDefaultQuantiles(): array
+    public static function getDefaultQuantiles()
     {
         return [
             0.01,
@@ -95,9 +97,11 @@ class Summary extends Collector
     /**
      * @param double $value e.g. 123
      * @param string[]  $labels e.g. ['status', 'opcode']
+     * @return void
      */
-    public function observe(float $value, array $labels = []): void
+    public function observe($value, array $labels = [])
     {
+        $value = (double) $value;
         $this->assertLabelsAreDefinedCorrectly($labels);
 
         $this->storageAdapter->updateSummary(
@@ -117,7 +121,7 @@ class Summary extends Collector
     /**
      * @return string
      */
-    public function getType(): string
+    public function getType()
     {
         return self::TYPE;
     }

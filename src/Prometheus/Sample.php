@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Prometheus;
 
 class Sample
@@ -41,15 +39,15 @@ class Sample
     /**
      * @return string
      */
-    public function getName(): string
+    public function getName()
     {
         return $this->name;
     }
 
     /**
-     * @return string[]
+     * @return mixed[]
      */
-    public function getLabelNames(): array
+    public function getLabelNames()
     {
         return $this->labelNames;
     }
@@ -57,7 +55,7 @@ class Sample
     /**
      * @return mixed[]
      */
-    public function getLabelValues(): array
+    public function getLabelValues()
     {
         return $this->labelValues;
     }
@@ -65,7 +63,7 @@ class Sample
     /**
      * @return string
      */
-    public function getValue(): string
+    public function getValue()
     {
         return (string) $this->value;
     }
@@ -73,7 +71,7 @@ class Sample
     /**
      * @return bool
      */
-    public function hasLabelNames(): bool
+    public function hasLabelNames()
     {
         return $this->labelNames !== [];
     }

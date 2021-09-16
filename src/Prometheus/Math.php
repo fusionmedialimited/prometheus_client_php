@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Prometheus;
 
 class Math
@@ -14,8 +12,9 @@ class Math
      *
      * @return float
      */
-    public function quantile(array $arr, float $q): float
+    public function quantile(array $arr, $q)
     {
+        $q = (double) $q;
         $count = count($arr);
         if ($count === 0) {
             return 0;

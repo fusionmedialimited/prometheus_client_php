@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Prometheus\Storage;
 
 use Prometheus\Math;
@@ -32,9 +30,9 @@ class InMemory implements Adapter
     private $summaries = [];
 
     /**
-     * @return MetricFamilySamples[]
+     * @return mixed[]
      */
-    public function collect(): array
+    public function collect()
     {
         $metrics = $this->internalCollect($this->counters);
         $metrics = array_merge($metrics, $this->internalCollect($this->gauges));
@@ -45,16 +43,18 @@ class InMemory implements Adapter
 
     /**
      * @deprecated use replacement method wipeStorage from Adapter interface
+     * @return void
      */
-    public function flushMemory(): void
+    public function flushMemory()
     {
         $this->wipeStorage();
     }
 
     /**
      * @inheritDoc
+     * @return void
      */
-    public function wipeStorage(): void
+    public function wipeStorage()
     {
         $this->counters = [];
         $this->gauges = [];
@@ -63,9 +63,9 @@ class InMemory implements Adapter
     }
 
     /**
-     * @return MetricFamilySamples[]
+     * @return mixed[]
      */
-    private function collectHistograms(): array
+    private function collectHistograms()
     {
         $histograms = [];
         foreach ($this->histograms as $histogram) {
@@ -138,9 +138,9 @@ class InMemory implements Adapter
     }
 
     /**
-     * @return MetricFamilySamples[]
+     * @return mixed[]
      */
-    private function collectSummaries(): array
+    private function collectSummaries()
     {
         $math = new Math();
         $summaries = [];
@@ -162,7 +162,7 @@ class InMemory implements Adapter
                 $decodedLabelValues = $this->decodeLabelValues($labelValues);
 
                 // Remove old data
-                $values = array_filter($values, function (array $value) use ($data): bool {
+                $values = array_filter($values, function (array $value) use ($data) {
                     return time() - $value['time'] <= $data['maxAgeSeconds'];
                 });
                 if (count($values) === 0) {
@@ -214,9 +214,9 @@ class InMemory implements Adapter
 
     /**
      * @param mixed[] $metrics
-     * @return MetricFamilySamples[]
+     * @return mixed[]
      */
-    private function internalCollect(array $metrics): array
+    private function internalCollect(array $metrics)
     {
         $result = [];
         foreach ($metrics as $metric) {
@@ -248,7 +248,7 @@ class InMemory implements Adapter
      * @param mixed[] $data
      * @return void
      */
-    public function updateHistogram(array $data): void
+    public function updateHistogram(array $data)
     {
         // Initialize the sum
         $metaKey = $this->metaKey($data);
@@ -285,7 +285,7 @@ class InMemory implements Adapter
      * @param mixed[] $data
      * @return void
      */
-    public function updateSummary(array $data): void
+    public function updateSummary(array $data)
     {
         $metaKey = $this->metaKey($data);
         if (array_key_exists($metaKey, $this->summaries) === false) {
@@ -308,8 +308,9 @@ class InMemory implements Adapter
 
     /**
      * @param mixed[] $data
+     * @return void
      */
-    public function updateGauge(array $data): void
+    public function updateGauge(array $data)
     {
         $metaKey = $this->metaKey($data);
         $valueKey = $this->valueKey($data);
@@ -331,8 +332,9 @@ class InMemory implements Adapter
 
     /**
      * @param mixed[] $data
+     * @return void
      */
-    public function updateCounter(array $data): void
+    public function updateCounter(array $data)
     {
         $metaKey = $this->metaKey($data);
         $valueKey = $this->valueKey($data);
@@ -358,7 +360,7 @@ class InMemory implements Adapter
      *
      * @return string
      */
-    private function histogramBucketValueKey(array $data, $bucket): string
+    private function histogramBucketValueKey(array $data, $bucket)
     {
         return implode(':', [
             $data['type'],
@@ -373,7 +375,7 @@ class InMemory implements Adapter
      *
      * @return string
      */
-    private function metaKey(array $data): string
+    private function metaKey(array $data)
     {
         return implode(':', [
             $data['type'],
@@ -387,7 +389,7 @@ class InMemory implements Adapter
      *
      * @return string
      */
-    private function valueKey(array $data): string
+    private function valueKey(array $data)
     {
         return implode(':', [
             $data['type'],
@@ -402,7 +404,7 @@ class InMemory implements Adapter
      *
      * @return mixed[]
      */
-    private function metaData(array $data): array
+    private function metaData(array $data)
     {
         $metricsMetaData = $data;
         unset($metricsMetaData['value'], $metricsMetaData['command'], $metricsMetaData['labelValues']);
@@ -411,10 +413,11 @@ class InMemory implements Adapter
 
     /**
      * @param mixed[] $samples
+     * @return void
      */
-    private function sortSamples(array &$samples): void
+    private function sortSamples(array &$samples)
     {
-        usort($samples, function ($a, $b): int {
+        usort($samples, function ($a, $b) {
             return strcmp(implode("", $a['labelValues']), implode("", $b['labelValues']));
         });
     }
@@ -424,7 +427,7 @@ class InMemory implements Adapter
      * @return string
      * @throws RuntimeException
      */
-    private function encodeLabelValues(array $values): string
+    private function encodeLabelValues(array $values)
     {
         $json = json_encode($values);
         if (false === $json) {
@@ -438,8 +441,9 @@ class InMemory implements Adapter
      * @return mixed[]
      * @throws RuntimeException
      */
-    private function decodeLabelValues(string $values): array
+    private function decodeLabelValues($values)
     {
+        $values = (string) $values;
         $json = base64_decode($values, true);
         if (false === $json) {
             throw new RuntimeException('Cannot base64 decode label values');

@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Prometheus;
 
 use Prometheus\Storage\Adapter;
@@ -13,9 +11,11 @@ class Gauge extends Collector
     /**
      * @param double $value e.g. 123
      * @param string[] $labels e.g. ['status', 'opcode']
+     * @return void
      */
-    public function set(float $value, array $labels = []): void
+    public function set($value, array $labels = [])
     {
+        $value = (double) $value;
         $this->assertLabelsAreDefinedCorrectly($labels);
 
         $this->storageAdapter->updateGauge(
@@ -34,15 +34,16 @@ class Gauge extends Collector
     /**
      * @return string
      */
-    public function getType(): string
+    public function getType()
     {
         return self::TYPE;
     }
 
     /**
      * @param string[] $labels
+     * @return void
      */
-    public function inc(array $labels = []): void
+    public function inc(array $labels = [])
     {
         $this->incBy(1, $labels);
     }
@@ -50,8 +51,9 @@ class Gauge extends Collector
     /**
      * @param int|float $value
      * @param string[] $labels
+     * @return void
      */
-    public function incBy($value, array $labels = []): void
+    public function incBy($value, array $labels = [])
     {
         $this->assertLabelsAreDefinedCorrectly($labels);
 
@@ -70,8 +72,9 @@ class Gauge extends Collector
 
     /**
      * @param string[] $labels
+     * @return void
      */
-    public function dec(array $labels = []): void
+    public function dec(array $labels = [])
     {
         $this->decBy(1, $labels);
     }
@@ -79,8 +82,9 @@ class Gauge extends Collector
     /**
      * @param int|float $value
      * @param string[] $labels
+     * @return void
      */
-    public function decBy($value, array $labels = []): void
+    public function decBy($value, array $labels = [])
     {
         $this->incBy(-$value, $labels);
     }

@@ -8,9 +8,9 @@ use Prometheus\Exception\MetricsRegistrationException;
 interface RegistryInterface
 {
     /**
-     * @return MetricFamilySamples[]
+     * @return mixed[]
      */
-    public function getMetricFamilySamples(): array;
+    public function getMetricFamilySamples();
 
     /**
      * @param string   $namespace e.g. cms
@@ -21,7 +21,7 @@ interface RegistryInterface
      * @return Gauge
      * @throws MetricsRegistrationException
      */
-    public function registerGauge(string $namespace, string $name, string $help, array $labels = []): Gauge;
+    public function registerGauge($namespace, $name, $help, array $labels = []);
 
     /**
      * @param string $namespace
@@ -30,7 +30,7 @@ interface RegistryInterface
      * @return Gauge
      * @throws MetricNotFoundException
      */
-    public function getGauge(string $namespace, string $name): Gauge;
+    public function getGauge($namespace, $name);
 
     /**
      * @param string   $namespace e.g. cms
@@ -41,7 +41,7 @@ interface RegistryInterface
      * @return Gauge
      * @throws MetricsRegistrationException
      */
-    public function getOrRegisterGauge(string $namespace, string $name, string $help, array $labels = []): Gauge;
+    public function getOrRegisterGauge($namespace, $name, $help, array $labels = []);
 
     /**
      * @param string   $namespace e.g. cms
@@ -52,7 +52,7 @@ interface RegistryInterface
      * @return Counter
      * @throws MetricsRegistrationException
      */
-    public function registerCounter(string $namespace, string $name, string $help, array $labels = []): Counter;
+    public function registerCounter($namespace, $name, $help, array $labels = []);
 
     /**
      * @param string $namespace
@@ -61,7 +61,7 @@ interface RegistryInterface
      * @return Counter
      * @throws MetricNotFoundException
      */
-    public function getCounter(string $namespace, string $name): Counter;
+    public function getCounter($namespace, $name);
 
     /**
      * @param string   $namespace e.g. cms
@@ -72,7 +72,7 @@ interface RegistryInterface
      * @return Counter
      * @throws MetricsRegistrationException
      */
-    public function getOrRegisterCounter(string $namespace, string $name, string $help, array $labels = []): Counter;
+    public function getOrRegisterCounter($namespace, $name, $help, array $labels = []);
 
     /**
      * @param string   $namespace e.g. cms
@@ -85,12 +85,12 @@ interface RegistryInterface
      * @throws MetricsRegistrationException
      */
     public function registerHistogram(
-        string $namespace,
-        string $name,
-        string $help,
+        $namespace,
+        $name,
+        $help,
         array $labels = [],
         array $buckets = null
-    ): Histogram;
+    );
 
     /**
      * @param string $namespace
@@ -99,7 +99,7 @@ interface RegistryInterface
      * @return Histogram
      * @throws MetricNotFoundException
      */
-    public function getHistogram(string $namespace, string $name): Histogram;
+    public function getHistogram($namespace, $name);
 
     /**
      * @param string $namespace e.g. cms
@@ -111,7 +111,7 @@ interface RegistryInterface
      * @return Histogram
      * @throws MetricsRegistrationException
      */
-    public function getOrRegisterHistogram(string $namespace, string $name, string $help, array $labels = [], array $buckets = null): Histogram;
+    public function getOrRegisterHistogram($namespace, $name, $help, array $labels = [], array $buckets = null);
 
     /**
      * @param string   $namespace e.g. cms
@@ -125,13 +125,13 @@ interface RegistryInterface
      * @throws MetricsRegistrationException
      */
     public function registerSummary(
-        string $namespace,
-        string $name,
-        string $help,
+        $namespace,
+        $name,
+        $help,
         array $labels = [],
-        int $maxAgeSeconds = 86400,
+        $maxAgeSeconds = 86400,
         array $quantiles = null
-    ): Summary;
+    );
 
     /**
      * @param string $namespace
@@ -140,7 +140,7 @@ interface RegistryInterface
      * @return Summary
      * @throws MetricNotFoundException
      */
-    public function getSummary(string $namespace, string $name): Summary;
+    public function getSummary($namespace, $name);
 
     /**
      * @param string $namespace e.g. cms
@@ -153,5 +153,5 @@ interface RegistryInterface
      * @return Summary
      * @throws MetricsRegistrationException
      */
-    public function getOrRegisterSummary(string $namespace, string $name, string $help, array $labels = [], int $maxAgeSeconds = 86400, array $quantiles = null): Summary;
+    public function getOrRegisterSummary($namespace, $name, $help, array $labels = [], $maxAgeSeconds = 86400, array $quantiles = null);
 }

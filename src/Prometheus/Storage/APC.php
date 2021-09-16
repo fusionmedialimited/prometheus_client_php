@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Prometheus\Storage;
 
 use APCUIterator;
@@ -25,8 +23,9 @@ class APC implements Adapter
      *
      * @throws StorageException
      */
-    public function __construct(string $prometheusPrefix = self::PROMETHEUS_PREFIX)
+    public function __construct($prometheusPrefix = self::PROMETHEUS_PREFIX)
     {
+        $prometheusPrefix = (string) $prometheusPrefix;
         if (!extension_loaded('apcu')) {
             throw new StorageException('APCu extension is not loaded');
         }
@@ -38,9 +37,9 @@ class APC implements Adapter
     }
 
     /**
-     * @return MetricFamilySamples[]
+     * @return mixed[]
      */
-    public function collect(): array
+    public function collect()
     {
         $metrics = $this->collectHistograms();
         $metrics = array_merge($metrics, $this->collectGauges());
@@ -51,8 +50,9 @@ class APC implements Adapter
 
     /**
      * @param mixed[] $data
+     * @return void
      */
-    public function updateHistogram(array $data): void
+    public function updateHistogram(array $data)
     {
         // Initialize the sum
         $sumKey = $this->histogramBucketValueKey($data, 'sum');
@@ -89,8 +89,9 @@ class APC implements Adapter
 
     /**
      * @param mixed[] $data
+     * @return void
      */
-    public function updateSummary(array $data): void
+    public function updateSummary(array $data)
     {
         // store meta
         $metaKey = $this->metaKey($data);
@@ -110,8 +111,9 @@ class APC implements Adapter
 
     /**
      * @param mixed[] $data
+     * @return void
      */
-    public function updateGauge(array $data): void
+    public function updateGauge(array $data)
     {
         $valueKey = $this->valueKey($data);
         if ($data['command'] === Adapter::COMMAND_SET) {
@@ -135,8 +137,9 @@ class APC implements Adapter
 
     /**
      * @param mixed[] $data
+     * @return void
      */
-    public function updateCounter(array $data): void
+    public function updateCounter(array $data)
     {
         $valueKey = $this->valueKey($data);
         // Check if value key already exists
@@ -160,7 +163,7 @@ class APC implements Adapter
      *
      * @return void
      */
-    public function flushAPC(): void
+    public function flushAPC()
     {
         $this->wipeStorage();
     }
@@ -170,7 +173,7 @@ class APC implements Adapter
      *
      * @return void
      */
-    public function wipeStorage(): void
+    public function wipeStorage()
     {
         //                   /      / | PCRE expresion boundary
         //                    ^       | match from first character only
@@ -187,7 +190,7 @@ class APC implements Adapter
      * @param mixed[] $data
      * @return string
      */
-    private function metaKey(array $data): string
+    private function metaKey(array $data)
     {
         return implode(':', [$this->prometheusPrefix, $data['type'], $data['name'], 'meta']);
     }
@@ -196,7 +199,7 @@ class APC implements Adapter
      * @param mixed[] $data
      * @return string
      */
-    private function valueKey(array $data): string
+    private function valueKey(array $data)
     {
         return implode(':', [
             $this->prometheusPrefix,
@@ -212,7 +215,7 @@ class APC implements Adapter
      * @param string|int $bucket
      * @return string
      */
-    private function histogramBucketValueKey(array $data, $bucket): string
+    private function histogramBucketValueKey(array $data, $bucket)
     {
         return implode(':', [
             $this->prometheusPrefix,
@@ -228,7 +231,7 @@ class APC implements Adapter
      * @param mixed[] $data
      * @return mixed[]
      */
-    private function metaData(array $data): array
+    private function metaData(array $data)
     {
         $metricsMetaData = $data;
         unset($metricsMetaData['value'], $metricsMetaData['command'], $metricsMetaData['labelValues']);
@@ -236,9 +239,9 @@ class APC implements Adapter
     }
 
     /**
-     * @return MetricFamilySamples[]
+     * @return mixed[]
      */
-    private function collectCounters(): array
+    private function collectCounters()
     {
         $counters = [];
         foreach (new APCUIterator('/^' . $this->prometheusPrefix . ':counter:.*:meta/') as $counter) {
@@ -267,9 +270,9 @@ class APC implements Adapter
     }
 
     /**
-     * @return MetricFamilySamples[]
+     * @return mixed[]
      */
-    private function collectGauges(): array
+    private function collectGauges()
     {
         $gauges = [];
         foreach (new APCUIterator('/^' . $this->prometheusPrefix . ':gauge:.*:meta/') as $gauge) {
@@ -299,9 +302,9 @@ class APC implements Adapter
     }
 
     /**
-     * @return MetricFamilySamples[]
+     * @return mixed[]
      */
-    private function collectHistograms(): array
+    private function collectHistograms()
     {
         $histograms = [];
         foreach (new APCUIterator('/^' . $this->prometheusPrefix . ':histogram:.*:meta/') as $histogram) {
@@ -374,9 +377,9 @@ class APC implements Adapter
     }
 
     /**
-     * @return MetricFamilySamples[]
+     * @return mixed[]
      */
-    private function collectSummaries(): array
+    private function collectSummaries()
     {
         $math = new Math();
         $summaries = [];
@@ -447,7 +450,7 @@ class APC implements Adapter
      * @return int
      * @throws RuntimeException
      */
-    private function toBinaryRepresentationAsInteger($val): int
+    private function toBinaryRepresentationAsInteger($val)
     {
         $packedDouble = pack('d', $val);
         if ((bool)$packedDouble !== false) {
@@ -464,7 +467,7 @@ class APC implements Adapter
      * @return float
      * @throws RuntimeException
      */
-    private function fromBinaryRepresentationAsInteger($val): float
+    private function fromBinaryRepresentationAsInteger($val)
     {
         $packedBinary = pack('Q', $val);
         if ((bool)$packedBinary !== false) {
@@ -478,10 +481,11 @@ class APC implements Adapter
 
     /**
      * @param mixed[] $samples
+     * @return void
      */
-    private function sortSamples(array &$samples): void
+    private function sortSamples(array &$samples)
     {
-        usort($samples, function ($a, $b): int {
+        usort($samples, function ($a, $b) {
             return strcmp(implode("", $a['labelValues']), implode("", $b['labelValues']));
         });
     }
@@ -491,7 +495,7 @@ class APC implements Adapter
      * @return string
      * @throws RuntimeException
      */
-    private function encodeLabelValues(array $values): string
+    private function encodeLabelValues(array $values)
     {
         $json = json_encode($values);
         if (false === $json) {
@@ -505,8 +509,9 @@ class APC implements Adapter
      * @return mixed[]
      * @throws RuntimeException
      */
-    private function decodeLabelValues(string $values): array
+    private function decodeLabelValues($values)
     {
+        $values = (string) $values;
         $json = base64_decode($values, true);
         if (false === $json) {
             throw new RuntimeException('Cannot base64 decode label values');

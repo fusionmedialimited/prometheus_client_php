@@ -9,5 +9,5 @@ interface RendererInterface
      *
      * @return string
      */
-    public function render(array $metrics): string;
+    public function render(array $metrics);
 }
