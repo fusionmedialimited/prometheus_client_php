@@ -156,34 +156,30 @@ class InMemory implements Adapter
                 'samples' => [],
             ];
 
-            foreach ($summary['samples'] as $key => &$values) {
+            foreach ($summary['samples'] as $key => &$samples) {
                 $parts = explode(':', $key);
                 $labelValues = $parts[2];
                 $decodedLabelValues = $this->decodeLabelValues($labelValues);
 
                 // Remove old data
-                $values = array_filter($values, function (array $value) use ($data) {
+                $samples = array_filter($samples, function (array $value) use ($data) {
                     return time() - $value['time'] <= $data['maxAgeSeconds'];
                 });
-                if (count($values) === 0) {
+                if (count($samples) === 0) {
                     unset($summary['samples'][$key]);
                     continue;
                 }
 
                 // Compute quantiles
-                usort($values, function (array $value1, array $value2) {
-                    if ($value1['value'] === $value2['value']) {
-                        return 0;
-                    }
-                    return ($value1['value'] < $value2['value']) ? -1 : 1;
-                });
+                $values = array_column($samples, 'value');
+                sort($values);
 
                 foreach ($data['quantiles'] as $quantile) {
                     $data['samples'][] = [
                         'name' => $metaData['name'],
                         'labelNames' => ['quantile'],
                         'labelValues' => array_merge($decodedLabelValues, [$quantile]),
-                        'value' => $math->quantile(array_column($values, 'value'), $quantile),
+                        'value' => $math->quantile($values, $quantile),
                     ];
                 }
 
@@ -200,7 +196,7 @@ class InMemory implements Adapter
                     'name' => $metaData['name'] . '_sum',
                     'labelNames' => [],
                     'labelValues' => $decodedLabelValues,
-                    'value' => array_sum(array_column($values, 'value')),
+                    'value' => array_sum($values),
                 ];
             }
             if (count($data['samples']) > 0) {
